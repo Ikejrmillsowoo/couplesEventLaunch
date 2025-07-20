@@ -59,6 +59,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Export registrations as CSV
+  app.get("/api/registrations/export", async (req, res) => {
+    try {
+      const registrations = await storage.getAllRegistrations();
+      
+      // CSV headers
+      const headers = [
+        'ID',
+        'First Name',
+        'Last Name', 
+        'Email',
+        'Phone',
+        'Expectations',
+        'Newsletter Opt-in',
+        'Registration Date'
+      ];
+      
+      // Convert data to CSV format
+      const csvRows = [headers.join(',')];
+      
+      registrations.forEach(registration => {
+        const row = [
+          registration.id,
+          `"${registration.firstName || ''}"`,
+          `"${registration.lastName || ''}"`,
+          `"${registration.email || ''}"`,
+          `"${registration.phone || ''}"`,
+          `"${(registration.expectations || '').replace(/"/g, '""')}"`,
+          registration.newsletterOptIn ? 'Yes' : 'No',
+          registration.registeredAt ? new Date(registration.registeredAt).toLocaleString() : ''
+        ];
+        csvRows.push(row.join(','));
+      });
+      
+      const csvContent = csvRows.join('\n');
+      
+      // Set headers for file download
+      const timestamp = new Date().toISOString().split('T')[0];
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="seminar-registrations-${timestamp}.csv"`);
+      res.send(csvContent);
+      
+    } catch (error) {
+      console.error("Error exporting registrations:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Error exporting registrations" 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
