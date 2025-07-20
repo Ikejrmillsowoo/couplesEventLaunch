@@ -20,9 +20,6 @@ export default function Home() {
     lastName: "",
     email: "",
     phone: "",
-    partnerFirstName: "",
-    partnerLastName: "",
-    relationshipLength: "",
     expectations: "",
     newsletterOptIn: false,
   });
@@ -46,9 +43,6 @@ export default function Home() {
           lastName: "",
           email: "",
           phone: "",
-          partnerFirstName: "",
-          partnerLastName: "",
-          relationshipLength: "",
           expectations: "",
           newsletterOptIn: false,
         });
@@ -368,40 +362,6 @@ export default function Home() {
                         onChange={(e) => updateFormData('phone', e.target.value)}
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="partnerFirstName">Partner's First Name</Label>
-                      <Input
-                        id="partnerFirstName"
-                        type="text"
-                        value={formData.partnerFirstName}
-                        onChange={(e) => updateFormData('partnerFirstName', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="partnerLastName">Partner's Last Name</Label>
-                      <Input
-                        id="partnerLastName"
-                        type="text"
-                        value={formData.partnerLastName}
-                        onChange={(e) => updateFormData('partnerLastName', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="relationshipLength">How long have you been together?</Label>
-                    <Select value={formData.relationshipLength} onValueChange={(value) => updateFormData('relationshipLength', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Please select..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="less-than-1">Less than 1 year</SelectItem>
-                        <SelectItem value="1-3">1-3 years</SelectItem>
-                        <SelectItem value="3-5">3-5 years</SelectItem>
-                        <SelectItem value="5-10">5-10 years</SelectItem>
-                        <SelectItem value="10+">10+ years</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
                   
                   <div>

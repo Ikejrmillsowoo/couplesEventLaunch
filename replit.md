@@ -37,10 +37,8 @@ The application follows a modern full-stack architecture with clear separation b
 
 ### Database Schema
 - **Users Table**: Basic user authentication with username/password
-- **Registrations Table**: Comprehensive registration data including:
+- **Registrations Table**: Individual registration data including:
   - Personal information (name, email, phone)
-  - Partner information (optional)
-  - Relationship details
   - Expectations and newsletter preferences
   - Timestamp tracking
 
