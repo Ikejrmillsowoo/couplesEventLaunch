@@ -1,4 +1,6 @@
 import { users, registrations, type User, type InsertUser, type Registration, type InsertRegistration } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -12,56 +14,41 @@ export interface IStorage {
   getRegistrationByEmail(email: string): Promise<Registration | undefined>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private registrations: Map<number, Registration>;
-  currentUserId: number;
-  currentRegistrationId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.registrations = new Map();
-    this.currentUserId = 1;
-    this.currentRegistrationId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
     return user;
   }
 
   async createRegistration(insertRegistration: InsertRegistration): Promise<Registration> {
-    const id = this.currentRegistrationId++;
-    const registration: Registration = { 
-      ...insertRegistration, 
-      id,
-      registeredAt: new Date()
-    };
-    this.registrations.set(id, registration);
+    const [registration] = await db
+      .insert(registrations)
+      .values(insertRegistration)
+      .returning();
     return registration;
   }
 
   async getAllRegistrations(): Promise<Registration[]> {
-    return Array.from(this.registrations.values());
+    return await db.select().from(registrations);
   }
 
   async getRegistrationByEmail(email: string): Promise<Registration | undefined> {
-    return Array.from(this.registrations.values()).find(
-      (registration) => registration.email === email,
-    );
+    const [registration] = await db.select().from(registrations).where(eq(registrations.email, email));
+    return registration || undefined;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

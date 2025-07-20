@@ -22,8 +22,9 @@ The application follows a modern full-stack architecture with clear separation b
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js framework
 - **Language**: TypeScript with ES modules
-- **Database**: PostgreSQL with Drizzle ORM
+- **Database**: PostgreSQL with Drizzle ORM (Active)
 - **Database Provider**: Neon Database (serverless PostgreSQL)
+- **Storage**: DatabaseStorage class with persistent PostgreSQL storage
 - **Session Management**: Express sessions with PostgreSQL store
 - **API Design**: RESTful API endpoints
 
