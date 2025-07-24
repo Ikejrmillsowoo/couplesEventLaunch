@@ -5,6 +5,7 @@ import { Download, Users, FileSpreadsheet, LogOut } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { queryClient } from "@/lib/queryClient";
 import type { Registration } from "@shared/schema";
 
 export default function Admin() {
@@ -16,6 +17,8 @@ export default function Admin() {
   // Check authentication status on component mount
   const { data: authData, isLoading: isAuthLoading } = useQuery({
     queryKey: ['/api/auth/status'],
+    staleTime: 0, // Always refetch to get latest auth status
+    gcTime: 0, // Don't cache auth status
   });
 
   const { data: registrationsData, isLoading } = useQuery({
@@ -40,6 +43,10 @@ export default function Admin() {
       });
       
       if (response.ok) {
+        // Invalidate auth cache to reflect logout
+        queryClient.invalidateQueries({ queryKey: ['/api/auth/status'] });
+        queryClient.removeQueries({ queryKey: ['/api/registrations'] });
+        
         toast({
           title: "Logged Out",
           description: "You have been successfully logged out.",

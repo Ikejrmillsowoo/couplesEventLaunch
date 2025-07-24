@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { queryClient } from "@/lib/queryClient";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -45,11 +46,18 @@ export default function Login() {
       const result = await response.json();
 
       if (result.success) {
+        // Invalidate auth status cache to reflect new login state
+        queryClient.invalidateQueries({ queryKey: ['/api/auth/status'] });
+        
         toast({
           title: "Login Successful",
           description: "Welcome to the admin dashboard",
         });
-        setLocation("/admin");
+        
+        // Add a small delay to ensure the query invalidation happens
+        setTimeout(() => {
+          setLocation("/admin");
+        }, 100);
       } else {
         toast({
           title: "Login Failed",

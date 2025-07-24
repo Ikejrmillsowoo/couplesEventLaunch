@@ -45,10 +45,16 @@ The application follows a modern full-stack architecture with clear separation b
 
 ### API Endpoints
 - `POST /api/registrations` - Create new registration with validation
-- `GET /api/registrations` - Retrieve all registrations (admin access)
+- `GET /api/registrations` - Retrieve all registrations (admin access, requires authentication)
+- `GET /api/registrations/export` - Download registrations as CSV (admin access, requires authentication)
+- `POST /api/auth/login` - Admin login endpoint
+- `POST /api/auth/logout` - Admin logout endpoint
+- `GET /api/auth/status` - Check authentication status
 
 ### Frontend Pages
 - **Home Page**: Primary registration form with comprehensive validation
+- **Login Page**: Admin authentication with session management
+- **Admin Dashboard**: Protected admin interface for viewing registrations and exporting data
 - **404 Page**: Error handling for undefined routes
 
 ### UI Components
