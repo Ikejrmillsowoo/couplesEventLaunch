@@ -22,9 +22,9 @@ The application follows a modern full-stack architecture with clear separation b
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js framework
 - **Language**: TypeScript with ES modules
-- **Storage**: Google Sheets API integration for data persistence
-- **Data Provider**: Google Sheets with API key authentication
-- **Storage**: GoogleSheetsStorage class with direct spreadsheet integration
+- **Storage**: In-memory storage for fast development and testing
+- **Data Export**: CSV export functionality for data backup
+- **Storage**: MemStorage class with console logging for registration tracking
 - **API Design**: RESTful API endpoints
 
 ### Development Setup
@@ -36,12 +36,12 @@ The application follows a modern full-stack architecture with clear separation b
 ## Key Components
 
 ### Data Storage
-- **Google Sheets Integration**: Direct API integration for data persistence
+- **In-Memory Storage**: MemStorage class for development and testing
 - **Registration Data**: Individual registration data including:
   - Personal information (name, email, phone)
   - Expectations and newsletter preferences
   - Timestamp tracking
-- **Sheet Structure**: Automatic header creation and row appending
+- **Export Functionality**: CSV export for data backup and analysis
 
 ### API Endpoints
 - `POST /api/registrations` - Create new registration with validation
