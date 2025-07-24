@@ -1,20 +1,80 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Users, FileSpreadsheet } from "lucide-react";
+import { Download, Users, FileSpreadsheet, LogOut } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 import type { Registration } from "@shared/schema";
 
 export default function Admin() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [isExporting, setIsExporting] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // Check authentication status on component mount
+  const { data: authData, isLoading: isAuthLoading } = useQuery({
+    queryKey: ['/api/auth/status'],
+  });
 
   const { data: registrationsData, isLoading } = useQuery({
     queryKey: ['/api/registrations'],
+    enabled: (authData as any)?.isAuthenticated === true, // Only fetch if authenticated
   });
 
   const registrations: Registration[] = (registrationsData as any)?.data || [];
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthLoading && authData && !(authData as any).isAuthenticated) {
+      setLocation("/login");
+    }
+  }, [authData, isAuthLoading, setLocation]);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Logged Out",
+          description: "You have been successfully logged out.",
+        });
+        setLocation("/login");
+      } else {
+        throw new Error("Logout failed");
+      }
+    } catch (error) {
+      toast({
+        title: "Logout Error",
+        description: "There was an error logging out.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  // Show loading state while checking authentication
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 to-pink-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600 mx-auto mb-4"></div>
+          <p>Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (!(authData as any)?.isAuthenticated) {
+    return null;
+  }
 
   const handleExportCSV = async () => {
     try {
@@ -58,9 +118,20 @@ export default function Admin() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-primary mb-2">Admin Dashboard</h1>
-            <p className="text-gray-600">Manage seminar registrations</p>
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-primary mb-2">Admin Dashboard</h1>
+              <p className="text-gray-600">Manage seminar registrations</p>
+            </div>
+            <Button 
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              {isLoggingOut ? "Logging out..." : "Logout"}
+            </Button>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 mb-8">
@@ -122,7 +193,7 @@ export default function Admin() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-500">
-                          {new Date(registration.registeredAt).toLocaleDateString()}
+                          {registration.registeredAt ? new Date(registration.registeredAt).toLocaleDateString() : 'N/A'}
                         </p>
                         {registration.newsletterOptIn && (
                           <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">

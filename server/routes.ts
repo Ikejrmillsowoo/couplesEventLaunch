@@ -1,10 +1,95 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import session from "express-session";
+import MemoryStore from "memorystore";
 import { storage } from "./storage";
 import { insertRegistrationSchema } from "@shared/schema";
 import { z } from "zod";
 
+const MemoryStoreSession = MemoryStore(session);
+
+// Middleware to check if user is authenticated
+function requireAuth(req: any, res: any, next: any) {
+  if (req.session && req.session.isAuthenticated) {
+    return next();
+  } else {
+    return res.status(401).json({ 
+      success: false, 
+      message: "Authentication required" 
+    });
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup session middleware
+  app.use(session({
+    store: new MemoryStoreSession({
+      checkPeriod: 86400000 // prune expired entries every 24h
+    }),
+    secret: process.env.SESSION_SECRET || 'couples-journey-secret-2025',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // Set to true in production with HTTPS
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  }));
+
+  // Login endpoint
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Simple hardcoded credentials (you can make this more secure later)
+      if (username === "admin" && password === "couples2025") {
+        (req.session as any).isAuthenticated = true;
+        (req.session as any).username = username;
+        
+        res.json({ 
+          success: true, 
+          message: "Login successful" 
+        });
+      } else {
+        res.status(401).json({ 
+          success: false, 
+          message: "Invalid username or password" 
+        });
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Login error occurred" 
+      });
+    }
+  });
+
+  // Logout endpoint
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err: any) => {
+      if (err) {
+        return res.status(500).json({ 
+          success: false, 
+          message: "Could not log out" 
+        });
+      }
+      res.json({ 
+        success: true, 
+        message: "Logged out successfully" 
+      });
+    });
+  });
+
+  // Check auth status
+  app.get("/api/auth/status", (req, res) => {
+    const isAuthenticated = req.session && (req.session as any).isAuthenticated;
+    res.json({ 
+      success: true, 
+      isAuthenticated: !!isAuthenticated,
+      username: isAuthenticated ? (req.session as any).username : null
+    });
+  });
   // Registration endpoint
   app.post("/api/registrations", async (req, res) => {
     try {
@@ -45,8 +130,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all registrations (for admin purposes)
-  app.get("/api/registrations", async (req, res) => {
+  // Get all registrations (for admin purposes) - protected route
+  app.get("/api/registrations", requireAuth, async (req, res) => {
     try {
       const registrations = await storage.getAllRegistrations();
       res.json({ success: true, data: registrations });
@@ -59,8 +144,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Export registrations as CSV
-  app.get("/api/registrations/export", async (req, res) => {
+  // Export registrations as CSV - protected route
+  app.get("/api/registrations/export", requireAuth, async (req, res) => {
     try {
       const registrations = await storage.getAllRegistrations();
       
