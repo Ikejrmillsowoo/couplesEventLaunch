@@ -1,57 +1,19 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Users, FileSpreadsheet } from "lucide-react";
+import { Users, ExternalLink } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
 import type { Registration } from "@shared/schema";
 
 export default function Admin() {
-  const { toast } = useToast();
-  const [isExporting, setIsExporting] = useState(false);
-
   const { data: registrationsData, isLoading } = useQuery({
     queryKey: ['/api/registrations'],
   });
 
   const registrations: Registration[] = (registrationsData as any)?.data || [];
 
-  const handleExportCSV = async () => {
-    try {
-      setIsExporting(true);
-      const response = await fetch('/api/registrations/export');
-      
-      if (!response.ok) {
-        throw new Error('Export failed');
-      }
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      
-      const timestamp = new Date().toISOString().split('T')[0];
-      a.download = `seminar-registrations-${timestamp}.csv`;
-      
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
-      toast({
-        title: "Export Successful",
-        description: "Registration data has been downloaded as CSV file.",
-      });
-    } catch (error) {
-      toast({
-        title: "Export Failed",
-        description: "There was an error exporting the data. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsExporting(false);
-    }
+  const openGoogleSheets = () => {
+    const sheetId = 'YOUR_SHEET_ID'; // This will be replaced with actual ID
+    window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`, '_blank');
   };
 
   return (
@@ -81,21 +43,20 @@ export default function Admin() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <FileSpreadsheet className="w-5 h-5 mr-2" />
-                  Export Data
+                  <ExternalLink className="w-5 h-5 mr-2" />
+                  View in Google Sheets
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <Button 
-                  onClick={handleExportCSV}
-                  disabled={isExporting || isLoading}
+                  onClick={openGoogleSheets}
                   className="w-full"
                 >
-                  <Download className="w-4 h-4 mr-2" />
-                  {isExporting ? "Exporting..." : "Download CSV"}
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Open Google Sheets
                 </Button>
                 <p className="text-sm text-gray-500 mt-2">
-                  Download all registration data as a CSV file for Excel or Google Sheets
+                  View and manage all registration data directly in your Google Sheets
                 </p>
               </CardContent>
             </Card>

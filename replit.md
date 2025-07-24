@@ -22,10 +22,9 @@ The application follows a modern full-stack architecture with clear separation b
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js framework
 - **Language**: TypeScript with ES modules
-- **Database**: PostgreSQL with Drizzle ORM (Active)
-- **Database Provider**: Neon Database (serverless PostgreSQL)
-- **Storage**: DatabaseStorage class with persistent PostgreSQL storage
-- **Session Management**: Express sessions with PostgreSQL store
+- **Storage**: Google Sheets API integration for data persistence
+- **Data Provider**: Google Sheets with API key authentication
+- **Storage**: GoogleSheetsStorage class with direct spreadsheet integration
 - **API Design**: RESTful API endpoints
 
 ### Development Setup
@@ -36,12 +35,13 @@ The application follows a modern full-stack architecture with clear separation b
 
 ## Key Components
 
-### Database Schema
-- **Users Table**: Basic user authentication with username/password
-- **Registrations Table**: Individual registration data including:
+### Data Storage
+- **Google Sheets Integration**: Direct API integration for data persistence
+- **Registration Data**: Individual registration data including:
   - Personal information (name, email, phone)
   - Expectations and newsletter preferences
   - Timestamp tracking
+- **Sheet Structure**: Automatic header creation and row appending
 
 ### API Endpoints
 - `POST /api/registrations` - Create new registration with validation
