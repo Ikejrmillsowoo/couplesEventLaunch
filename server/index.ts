@@ -40,7 +40,7 @@ app.use((req, res, next) => {
   const server = await registerRoutes(app);
 
   if (app.get("env") === "development") {
-  const { setupVite } = await import("./vite-dev.js"); // 🔥 important: reference .js not .ts
+  const { setupVite } = await import("./dev-only/vite-dev.js"); // 🔥 important: reference .js not .ts
   await setupVite(app, server);
 }
 
@@ -56,7 +56,7 @@ app.use((req, res, next) => {
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
   if (app.get("env") === "development") {
-    const { setupVite } = await import("./vite");
+    const { setupVite } = await import("./dev-only/vite-dev.ts");
     await setupVite(app, server);
   } else {
     const { serveStatic } = await import("./vite");
