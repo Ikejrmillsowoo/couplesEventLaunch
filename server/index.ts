@@ -60,7 +60,7 @@ app.use((req, res, next) => {
   const port = parseInt(process.env.PORT || '5003', 10);
 
    if (process.env.NODE_ENV === "development") {
-  const { setupVite } = await import("./dev-only/vite-dev.js"); // 🔥 important: reference .js not .ts
+  const { setupVite } = await import("../dev-only/vite-dev.js"); // 🔥 important: reference .js not .ts
   await setupVite(app, server);
 } else {
   const { serveStatic } = await import("./utils/serve-static.js"); // 🔥 important: reference .js not .ts
