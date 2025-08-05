@@ -11,3 +11,4 @@ export async function setupVite(app: Express, server: Server) {
 
   app.use(vite.middlewares);
 }
+
